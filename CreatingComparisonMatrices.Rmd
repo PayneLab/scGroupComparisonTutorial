@@ -1,0 +1,48 @@
+---
+title: "Creating Comparison Matrices"
+output: html_document
+date: "2025-05-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In order to specify which groups are compared by a hypothesis, a comparison matrix is used. This comparison matrix enables you to test different group comparisons, where each row corresponds to a unique group comparison. NOTE: different comparison matrices should be used for different fundamental hypothesis types.
+
+
+In a comparison matrix:  
+- Each column represents a different cell type.  
+- Each row represents a different group comparison.  
+- Each value represents the magnitude of a group's inclusion in the hypothesis. For our models, a hypothesis compares two groups, A and B. Each group can be made up of multiple cell types.  
+- If there are multiple cell types in a hypothesis group, each cell type will usually be represented equally in its hypothesis group. Ex: if two cell types are in hypothesis group A, each cell type gets a value of 1/2. if three cell types are in hypothesis group B, each cell type gets a value of -1/3. If a cell type is not considered in a group comparison, its value is 0.  
+- Each row must sum to 0.  
+
+Comparison matrices can be created easily using the matrix() function:  
+
+```{r matrix_example}
+
+cell_types = c('celltype1','celltype2','celltype3','celltype4','celltype5')
+n_cell_types = length(cell_types)
+
+group_comparisons = c('grouping1','grouping2','grouping3')
+n_group_comparisons = length(group_comparisons)
+
+data = c(1/2, 1/2,-1/2,-1/2, 0,
+         1/3, 1/3, 1/3,-1/2, -1/2,
+         0,   0,   0,   1,  -1)
+
+m = matrix(data,
+           nrow = n_group_comparisons,
+           ncol = n_cell_types,
+           dimnames = list(group_comparisons, cell_types),
+           byrow = TRUE)
+
+m
+
+```
+
+In this matrix, there are 5 cell types and 3 group comparisons:  
+- Group comparison 1 compares cell types 1 & 2 against cell types 3 & 4.  
+- Group comparison 2 compares cell types 1, 2 & 3 against cell types 4 & 5.  
+- Group comparison 3 compares cell type 4 against cell type 5.  
