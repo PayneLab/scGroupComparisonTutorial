@@ -1,5 +1,5 @@
 ---
-title: "ModelSelection"
+title: "HypothesisSelection"
 output: html_document
 date: "2025-05-28"
 ---
@@ -8,22 +8,36 @@ date: "2025-05-28"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Is Model 7 Right For Your Experiment?
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Model 7 can be used to analyze data from any kind of mass spectrometry experiment, however it is especially useful for data with variability across multiple levels of grouping factors (i.e. translational proteomics). This is because it is based on linear mixed-effect models that can account for both fixed and random effects. In contrast, t-tests has no way of accounting for random effects. T-tests are appropriate when there are no random effects to account for (flat data). In these cases, Model 7 will still work, but it's unnecessarily sophisticated. In short: if your data has random effects / multiple levels of grouping factors, use Model 7. If not, use a simpler model like a t-test.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Additionally, Model 7 is only suited for comparison of two groups, A and B. If a third group C needs to be compared, a model such as mixed-effects ANOVA would be more suitable. (This section probably needs to be improved for clarity, but I'm not sure how to.)
 
-```{r cars}
-summary(cars)
-```
+## Choosing The Right Hypothesis
 
-## Including Plots
+To preserve the random effects of hierarchical data, special care must be taken to avoid reducing the dimensionality of (flattening) the data. Model 7 accomplishes this by forcing you to choose between 3 distinct hypothesis types that compare different aspects of hierarchical data. In doing so, it also (maybe?) avoids mixed effect modeling (if so, what's the benefit?).
 
-You can also embed plots, for example:
+*Question*: I've only seen examples with conditions and cell types as the two sources of variability. How does Model 7 deal with, say, cell type and patient and hospital levels at the same time? Seeing an example would be super helpful.
+- Partial answer: the BioReplicate column in the dataframe accounts for patient-level variability. Maybe patient and cell type are the only random effects we want to account for at the moment?
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+### Hypothesis 1 - Comparing conditions within the same cell type  
+For 2 cell types and 2 conditions, there are 2 versions of hypothesis 1:  
+- Condition 1 vs Condition 2 within cell type 1   
+- Condition 1 vs condition 2 within cell type 2  
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+For example, we would use hypothesis 1 if we wanted to compare protein expression in smooth muscle cells between wildtype and diseased subjects.
+
+### Hypothesis 2 - Comparing cell types within the same condition
+For 2 cell types and 2 conditions, there are 2 versions of hypothesis 2:
+- cell type 1 vs cell type 2 within Condition 1
+- cell type 1 vs cell type 2 within Condition 2
+
+For example, we would use hypothesis 2 if we wanted to compare protein expression between smooth muscle cells and fibrous cells within wildtype subjects.  
+
+### Hypothesis 3 - Difference of Differences
+Hypothesis 3 effectively compares the difference between version 1 and version 2 of Hypothesis 1.  
+
+Keeping to the same dataset as the previous example, hypothesis 3 would be comparing the difference in protein expression in smooth muscle cells between wildtype and diseased subjects with the difference in protein expression in fibrous cells between wildtype and diseased subjects. 
+
+This can be expressed as (smc X WT - smc X diseased) - (fibrous X WT - smc X diseased)
